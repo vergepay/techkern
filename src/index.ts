@@ -1,28 +1,17 @@
-export { Techkern } from "./router";
-export type { RouteRequest, RouteResponse, Provider, BackendInfo } from "./types";
-// step 3
-// step 4
-// step 5
-// step 6
-// step 8
-// step 11
-// step 13
-// step 14
-// step 16
-// step 17
-// step 18
-// step 20
-// step 21
-// step 22
-// step 23
-// step 24
-// step 25
-// step 26
-// step 27
-// step 28
-// step 35
-// step 36
-// step 38
-// step 39
-// step 40
-// step 41
+/**
+ * techkern — MCP server for Solana
+ *
+ * Entry point. Wires the MCP gateway and registers all tool handlers.
+ */
+import { startServer } from "./server";
+
+export { startServer };
+export * from "./types";
+
+if (require.main === module) {
+  startServer().catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error("[techkern] fatal:", err);
+    process.exit(1);
+  });
+}
