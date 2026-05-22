@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "techkern": {
+      "command": "npx",
+      "args": ["@techkern/mcp"]
+    }
+  }
+}

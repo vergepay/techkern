@@ -1,90 +1,86 @@
-cat > docs/sdk-matrix.md << '# SDK matrix\n\nNode / Python / Rust covered. Go planned Q3 2026.\n'
-cat > docs/benchmarks.md << '# Benchmarks\n\nSee README.md table — re-run via `npm run bench`.\n'
-cat > docs/providers.md << '# Providers\n\nGroq, Together, Lambda, Fireworks, Anyscale, OpenAI, Anthropic.\n'
+# API Reference
 
-# Spec
-cat > spec/RFC-0001-router-protocol.md << 'EOF'
-# RFC-0001: Router protocol
+Every techkern MCP tool, input schema, and a sample response.
 
-## Status: Accepted
+## `query_solana_swaps`
+DEX swaps across Jupiter, Raydium, Orca, Meteora.
 
-## Summary
-Defines `/v1/route` endpoint shape — drop-in OpenAI Chat Completions compatibility plus
-`model: "auto"` mode that delegates provider selection to Techkern.
-EOF
-cat > spec/RFC-0002-backend-abstraction.md << '# RFC-0002: Backend abstraction\n\n## Status: Accepted\n\nProvider-agnostic interface with `cost()`, `call()`, `stream()` per backend.\n'
-cat > spec/RFC-0003-eval-rollback.md << '# RFC-0003: Eval rollback\n\n## Status: Experimental\n\nQuality-floor regression detection. If cheaper provider drops quality below floor, route back to default within 100ms.\n'
+```ts
+{
+  mint?:    string,                             // filter on either side
+  wallet?:  string,
+  dex?:     "jupiter" | "raydium" | "orca" | "meteora",
+  minUsd?:  number,
+  from?:    string,  // ISO or "now-1h"
+  to?:      string,
+  limit?:   number   // 1..1000, default 100
+}
+```
+Returns array of `Swap { signature, slot, blockTime, dex, inputMint, outputMint, inputAmount, outputAmount, usdValue, wallet }`.
 
-# Workflows
-cat > .github/workflows/ci.yml << 'EOF'
-name: CI
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - run: npm install
-      - run: npm test
-EOF
-cat > .github/workflows/heartbeat.yml << 'EOF'
-name: Heartbeat
-on:
-  schedule:
-    - cron: '30 14 * * 2,4,6'
-  workflow_dispatch:
-permissions:
-  contents: write
-jobs:
-  heartbeat:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo "$(date)" > .health && git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com" && git add -A && git diff --cached --quiet || git commit -m "chore: routine maintenance" && git push
-EOF
+## `query_pump_fun_launches`
+New pump.fun mints and bonding-curve progress.
+```ts
+{ creator?: string, minMcapUsd?: number, minBondingPct?: number, from?: string, to?: string, limit?: number }
+```
 
-# Other config
-cat > .gitignore << 'EOF'
-node_modules/
-dist/
-.env
-.env.local
-*.log
-EOF
-cat > .editorconfig << 'EOF'
-root = true
-[*]
-indent_style = space
-indent_size = 2
-end_of_line = lf
-charset = utf-8
-trim_trailing_whitespace = true
-insert_final_newline = true
-EOF
-cat > .prettierrc << '{ "semi": true, "singleQuote": false, "printWidth": 100 }'
+## `query_token_holders`
+Top-N holder distribution.
+```ts
+{ mint: string, topN?: number }
+```
 
-cat > SECURITY.md << 'EOF'
-# Security
-Report vulnerabilities to security@techkern.xyz. Acknowledgement within 48h.
-EOF
+## `query_kol_wallets`
+KOL wallet tracker (1,400+ wallets).
+```ts
+{ minPnl30d?: number, minWinRate?: number, recentBuyMint?: string, limit?: number }
+```
 
-cat > CONTRIBUTING.md << 'EOF'
-# Contributing
-Fork → branch → PR against main. Run `npm test` first.
-EOF
+## `mint_authority_check`
+Mint + freeze authority status (live RPC read).
+```ts
+{ mint: string }
+```
+Returns `{ mintAuthority, freezeAuthority, decimals, supply, isRenounced }`.
 
-cat > CHANGELOG.md << 'EOF'
-# Changelog
-## v0.4.0 — Rust SDK + benchmarks
-## v0.3.1 — Streaming chunk handling hotfix
-## v0.3.0 — Node + Python SDKs
-## v0.2.0 — Provider failover
-## v0.1.0 — Initial Groq + Together router
-EOF
+## `dev_token_history`
+Every SPL mint ever deployed by a wallet.
+```ts
+{ wallet: string, includeDead?: boolean, limit?: number }
+```
 
-echo "=== Scaffold done ($(find . -type f -not -path './.git/*' | wc -l) files) ==="
-EOF
-chmod +x "C:\Users\79150\Desktop/моча/02_sites/clones/techkern-repo/scaffold-and-push.sh"
-echo "Script written"
+## `whale_tracker`
+Large swaps above a USD threshold, with KOL attribution.
+```ts
+{ minUsd?: number, mint?: string, from?: string, to?: string, limit?: number }
+```
+
+## `new_token_alerts`
+One-shot poll of new mints in the last N minutes.
+```ts
+{ source?: "pumpfun" | "raydium-clmm" | "any", minLpUsd?: number, symbolRegex?: string, windowMinutes?: number }
+```
+For live streaming, subscribe to `subscribe.solana.new_mint` over WS (see [RFC-0003](../spec/RFC-0003-websocket-stream-format.md)).
+
+## `liquidity_depth`
+Aggregated DEX depth curve at +/- N bps from mid.
+```ts
+{ baseMint?: string, quoteMint?: string, bpsLevels?: number[] }
+```
+
+## `holder_distribution`
+Gini coefficient, top-N concentration %, holder-count history.
+```ts
+{ mint: string, topN?: number[], historyDays?: number }
+```
+
+## WebSocket subscriptions
+
+Connect to `wss://api.techkern.xyz/mcp/stream`:
+
+| Topic | Payload |
+|---|---|
+| `subscribe.solana.new_mint` | `{ mint, symbol, creator, lpUsd }` |
+| `subscribe.solana.swaps.large` | full `Swap` with `minUsd` filter |
+| `subscribe.pumpfun.bonding_complete` | `{ mint, bondingClosedAt, finalMcap }` |
+| `subscribe.kol.recent_buy` | `{ wallet, mint, usdValue }` |
