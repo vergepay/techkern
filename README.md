@@ -13,7 +13,22 @@ Any AI agent. Live Solana context. One install.
 
 [Website](https://techkern.xyz) · [Docs](./docs/quickstart.md) · [X](https://x.com/kernonsol)
 
+**`$TECH`** · Solana · `GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z`
+
 </div>
+
+---
+
+## $TECH token
+
+Pay-per-query in `$TECH` on Solana.
+
+- **Contract:** [`GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z`](https://solscan.io/token/GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z)
+- **Network:** Solana mainnet
+- **Distribution:** 85% to validators running indexer shards · 10% buyback & burn · 5% dev fund
+- **Validators:** stake `$TECH` to run an indexer shard (swaps / pumpfun / holders / kol) and earn per-query fees
+
+Trade: [DexScreener](https://dexscreener.com/solana/GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z) · [GMGN](https://gmgn.ai/sol/token/GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z) · [Jupiter](https://jup.ag/swap/SOL-GPUPdSsC3FqyaWsMjDAUrbCSbg5vhwbmwSieQeGoDB2z)
 
 ---
 
